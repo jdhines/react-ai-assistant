@@ -4,7 +4,7 @@ export function useChatMessages() {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const CHAT_ENDPOINT = "https://web-hq-fastapi-public-gaf9hscmcxgdf7dx.centralindia-01.azurewebsites.net/chat";
+  const CHAT_ENDPOINT = import.meta.env.CHAT_ENDPOINT;
 
   const addMessage = (sender: 'user' | 'bot', text: string) => {
     const nextMessage = {
