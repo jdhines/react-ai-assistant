@@ -1,0 +1,18 @@
+import { BackButton } from "~/components/BackButton";
+
+interface ChatHeaderProps {
+  chatId?: string;
+  onNewChat: () => void;
+}
+
+export function ChatHeader({ chatId, onNewChat }: ChatHeaderProps) {
+  return (
+    <div className="flex px-4 justify-between items-center">
+      <BackButton to="/" />
+      {chatId && <span className="text-gray-500">Chat ID: {chatId}</span>}
+      <button type="button" onClick={onNewChat} className="text-blue-500 bg-none p-2">
+        + New Chat
+      </button>
+    </div>
+  );
+}
