@@ -1,12 +1,16 @@
-Welcome to your new TanStack app! 
+Welcome to your new TanStack app!
 
 # Getting Started
 
 To run this application:
 
+Copy `.env.example` and rename the copy to `.env`. This file will be ignored by Git.
+
+In `.env`, update the value of `CHAT_ENDPOINT` to your chatbot API endpoint.
+
 ```bash
 npm install
-npm run start  
+npm run start
 ```
 
 # Building For Production
