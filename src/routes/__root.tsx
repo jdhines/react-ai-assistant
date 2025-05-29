@@ -5,9 +5,9 @@ import { Header } from "../components/Header";
 
 export const Route = createRootRoute({
 	component: () => (
-		<main className="mt-16 max-w-screen-md flex flex-col m-auto max-w-1/3 rounded-md shadow-md">
+		<main className="fixed bottom-6 right-6 max-h-[90vh] max-w-[420px] w-full sm:w-[420px] flex flex-col bg-white rounded-lg shadow-lg border border-gray-200">
 			<Header />
-			<div>
+			<div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
 				<ChatProvider>
 					<Outlet />
 				</ChatProvider>
