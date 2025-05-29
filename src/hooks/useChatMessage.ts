@@ -1,15 +1,16 @@
 import React from "react";
+import type { ChatMessageProps } from "../types/ChatMessageProps";
 
 export function useChatMessages() {
-  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [messages, setMessages] = React.useState<ChatMessageProps[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const CHAT_ENDPOINT = import.meta.env.CHAT_ENDPOINT;
+  const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT;
 
-  const addMessage = (sender: 'user' | 'bot', text: string) => {
-    const nextMessage = {
+  const addMessage = (role: 'user' | 'bot', text: string) => {
+    const nextMessage: ChatMessageProps = {
       id: crypto.randomUUID(),
-      sender,
+      role,
       text,
       timestamp: new Date(),
     }
@@ -18,12 +19,16 @@ export function useChatMessages() {
 
   const sendMessage = async (userInput: string) => {
     setIsLoading(true);
-    addMessage("user", userInput);
+    addMessage("user", userInput.trim());
+
+    const bodyMessages = [...messages, {role: "user", content: userInput.trim()}];
+    const bodyJson = JSON.stringify({"messages": bodyMessages});
 
     //TODO: remove this test for adaptive cards
     // if the userInput contains "adaptive card", simulate a response from utils/adaptive-sample.json
     if (userInput.toLowerCase().includes("adaptive")) {
       addMessage("bot", "Adaptive Card sample:");
+      setIsLoading(false);
       return;
     }
 
@@ -34,6 +39,7 @@ export function useChatMessages() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input: userInput }),
+          // body: bodyJson,
         }
       );
 
