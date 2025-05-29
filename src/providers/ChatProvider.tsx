@@ -1,78 +1,95 @@
-import React from 'react';
+import React from "react";
 import type { ChatMessageProps } from "../types/ChatMessageProps";
 
-export const ChatContext = React.createContext(null);
+type ChatContextType = {
+	chatId: string;
+	getNewChatId: () => string;
+	resetChat: (id?: string) => void;
+	messages: ChatMessageProps[];
+	sendMessage: (userInput: string) => Promise<void>;
+	isLoading: boolean;
+};
 
-function ChatProvider({ children }) {
-  const [chatId, setChatId] = React.useState("");
-  const [messages, setMessages] = React.useState<ChatMessageProps[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT;
+export const ChatContext = React.createContext<ChatContextType | null>(null);
 
-  const getNewChatId = () => {
-    return crypto.randomUUID();
-  };
-  const resetChat = (id = crypto.randomUUID()) => {
-    setChatId(id);
-    setMessages([]);
-  };
+function ChatProvider({ children }: { children: React.ReactNode }) {
+	const [chatId, setChatId] = React.useState("");
+	const [messages, setMessages] = React.useState<ChatMessageProps[]>([]);
+	const [isLoading, setIsLoading] = React.useState(false);
+	const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT;
 
-  const addMessage = (role: 'user' | 'bot', text: string) => {
-    const nextMessage: ChatMessageProps = {
-      id: crypto.randomUUID(),
-      role,
-      text,
-      timestamp: new Date(),
-    }
-    setMessages((prev) => [...prev, nextMessage]);
-  };
+	const getNewChatId = () => {
+		return crypto.randomUUID();
+	};
+	const resetChat = (id: string | undefined = crypto.randomUUID()) => {
+		setChatId(id);
+		setMessages([]);
+	};
 
-  const sendMessage = async (userInput: string) => {
-    setIsLoading(true);
-    addMessage("user", userInput.trim());
+	const addMessage = (role: "user" | "bot", text: string) => {
+		const nextMessage: ChatMessageProps = {
+			id: crypto.randomUUID(),
+			role,
+			text,
+			timestamp: new Date(),
+		};
+		setMessages((prev) => [...prev, nextMessage]);
+	};
 
-    const bodyMessages = [...messages, {role: "user", content: userInput.trim()}];
-    const bodyJson = JSON.stringify({"messages": bodyMessages});
+	const sendMessage = async (userInput: string) => {
+		setIsLoading(true);
+		addMessage("user", userInput.trim());
 
-    //TODO: remove this test for adaptive cards
-    // if the userInput contains "adaptive card", simulate a response from utils/adaptive-sample.json
-    if (userInput.toLowerCase().includes("adaptive")) {
-      addMessage("bot", "Adaptive Card sample:");
-      setIsLoading(false);
-      return;
-    }
+		const bodyMessages = [
+			...messages,
+			{ role: "user", content: userInput.trim() },
+		];
+		const bodyJson = JSON.stringify({ messages: bodyMessages });
 
-    try {
-      const response = await fetch(
-        CHAT_ENDPOINT,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input: userInput }),
-          // body: bodyJson,
-        }
-      );
+		//TODO: remove this test for adaptive cards
+		// if the userInput contains "adaptive card", simulate a response from utils/adaptive-sample.json
+		if (userInput.toLowerCase().includes("adaptive")) {
+			addMessage("bot", "Adaptive Card sample:");
+			setIsLoading(false);
+			return;
+		}
 
-      if (response.ok) {
-        const data = await response.json();
-        addMessage("bot", data.response);
-      } else {
-        throw new Error("Failed to fetch response from server");
-      }
-    } catch (error) {
-      console.error("Error while sending message:", error);
-      addMessage("bot", "Sorry, I encountered an error. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+		try {
+			const response = await fetch(CHAT_ENDPOINT, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ input: userInput }),
+				// body: bodyJson,
+			});
 
+			if (response.ok) {
+				const data = await response.json();
+				addMessage("bot", data.response);
+			} else {
+				throw new Error("Failed to fetch response from server");
+			}
+		} catch (error) {
+			console.error("Error while sending message:", error);
+			addMessage("bot", "Sorry, I encountered an error. Please try again.");
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  return (
-    <ChatContext.Provider value={{ chatId, getNewChatId, resetChat, messages, sendMessage, isLoading }}>
-      {children}
-    </ChatContext.Provider>
-  );
+	return (
+		<ChatContext.Provider
+			value={{
+				chatId,
+				getNewChatId,
+				resetChat,
+				messages,
+				sendMessage,
+				isLoading,
+			}}
+		>
+			{children}
+		</ChatContext.Provider>
+	);
 }
 
 export default ChatProvider;
