@@ -23,7 +23,7 @@ export default function HomeLink({
 			"text-md font-semibold from-white to-gray-50 text-gray-800 hover:to-gray-200",
 	};
 	const css = clsx(
-		`${colorClasses[type]} flex items-end bg-gradient-to-br rounded-3xl p-6 shadow-md`,
+		`${colorClasses[type]} flex items-end bg-gradient-to-br rounded-2xl p-6 shadow-md`,
 		className,
 	);
 
