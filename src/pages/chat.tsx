@@ -9,7 +9,7 @@ import { ChatContext } from "~/providers/ChatProvider";
 
 export function ChatPage() {
   const [userInput, setUserInput] = React.useState("");
-  const { messages, sendMessage, clearMessages, isLoading } = useChatMessages();
+  const { messages, sendMessage, isLoading } = useChatMessages();
   const { chatId, getNewChatId, resetChat } = React.useContext(ChatContext);
   const navigate = useNavigate();
 
@@ -19,7 +19,6 @@ export function ChatPage() {
   };
 
   const handleNewChat = () => {
-    clearMessages();
     setUserInput("");
     const nextChatId = getNewChatId();
     resetChat(nextChatId);
