@@ -25,4 +25,6 @@ steps:
       app_location: '/'
       output_location: '$(build_dir)'
       azure_static_web_apps_api_token: '$(deployment_token)'
+    env:
+      VITE_CHAT_ENDPOINT: $(chat_endpoint_url)
     displayName: 'Deploy to Azure Static Web Apps'
