@@ -5,8 +5,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  # Output folder for Vite is usually 'dist'
-  build_dir: 'dist'
+- name: build_dir
+  value: dist
+- group: static-webapp
 
 steps:
   - task: NodeTool@0
