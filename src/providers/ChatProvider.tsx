@@ -40,6 +40,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 		setIsLoading(true);
 		addMessage("user", userInput.trim());
 
+		//TODO: swap to sending all messages once API supports it
 		const bodyMessages = [
 			...messages,
 			{ role: "user", content: userInput.trim() },
