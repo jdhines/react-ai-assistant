@@ -30,7 +30,7 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 }
 
 function ChatMessage(props: ChatMessageProps) {
-	const { role, text, timestamp } = props;
+	const { role, messageContent, adaptiveContent, type, timestamp } = props;
 	//TODO: Remove example of adaptive card
 	const handleError = (error: Error) => {
 		console.error("Adaptive Card error:", error);
@@ -67,20 +67,16 @@ function ChatMessage(props: ChatMessageProps) {
 								: "bg-white text-gray-800 border border-gray-200"
 						}`}
 					>
-						<ReactMarkdown>{text}</ReactMarkdown>
-					</div>
-
-					{/* Adaptive Card */}
-					{text.includes("Adaptive") && (
-						<div className="w-full">
+						{type === "adaptiveCard" ? (
 							<AdaptiveCard
-								payload={SampleData}
-								style={{ color: "green" }}
+								payload={adaptiveContent ?? {}}
 								onError={handleError}
 								hostConfig={hostConfig}
 							/>
-						</div>
-					)}
+						) : (
+							<ReactMarkdown>{messageContent}</ReactMarkdown>
+						)}
+					</div>
 
 					<span className="text-xs text-gray-500">
 						{timestamp ? timestamp.toLocaleTimeString() : ""}
