@@ -2,7 +2,6 @@ import { Bot, Send, User } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { AdaptiveCard } from "~/components/adaptivecards-react/adaptive-card";
-import SampleData from "~/utils/adaptive-sample";
 import type { ChatMessageProps } from "../types/ChatMessageProps";
 
 interface ChatMessageListProps {

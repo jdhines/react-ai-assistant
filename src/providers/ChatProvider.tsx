@@ -71,6 +71,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 				responseObj = responseObj.response;
 			}
 		}
+		console.log("Parsed response object:", responseObj);
 		return {
 			text: responseObj.text || null,
 			adaptiveCard: responseObj.adaptiveCard || null,
@@ -99,14 +100,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 				if (response.ok) {
 					const data = await response.json();
 					const { text, adaptiveCard, fallback } = parseApiResponse(data);
-					if (text) {
-						console.log("Response data.text:", text);
-						addMessage({
-							role: "bot",
-							type: "text",
-							messageContent: text,
-						});
-					}
+
+					//prioritize adaptiveCard over text
 					if (adaptiveCard) {
 						console.log("Response data.adaptiveCard:", adaptiveCard);
 						addMessage({
@@ -114,16 +109,21 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 							type: "adaptiveCard",
 							adaptiveContent: adaptiveCard,
 						});
-					}
-					if (!text && !adaptiveCard && fallback) {
-						console.log("only response found");
+					} else if (text) {
+						console.log("Response data.text:", text);
+						addMessage({
+							role: "bot",
+							type: "text",
+							messageContent: text,
+						});
+					} else {
+						console.log("Only response found:", fallback);
 						addMessage({
 							role: "bot",
 							type: "text",
 							messageContent: JSON.stringify(fallback),
 						});
 					}
-					console.log("Response from server:", data);
 				} else {
 					throw new Error("Failed to fetch response from server");
 				}

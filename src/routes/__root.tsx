@@ -10,7 +10,7 @@ export const Route = createRootRoute({
 		const toggleExpand = () => setExpanded((e) => !e);
 		return (
 			<main
-				className={`fixed bottom-6 right-6 min-h-[50vh] ${expanded ? "max-w-[840px] w-[840px] max-h-[95vh] h-[95vh]" : "max-w-[420px] w-full sm:w-[420px] max-h-[95vh]"} flex flex-col bg-white rounded-lg shadow-lg border border-gray-200`}
+				className={`fixed bottom-6 right-6 min-h-[50vh] ${expanded ? "max-w-[840px] w-[840px] max-h-[95vh] h-[95vh]" : "w-[560px] max-h-[95vh]"} flex flex-col bg-white rounded-lg shadow-lg border border-gray-200`}
 				style={{ zIndex: 50 }}
 			>
 				<Header expanded={expanded} toggleExpand={toggleExpand} />
