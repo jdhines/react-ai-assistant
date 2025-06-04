@@ -52,31 +52,26 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 
 	// Helper to parse API response and extract text/adaptiveCard
 	function parseApiResponse(data: any) {
-		let responseObj = data;
+		let responseObj = data.response;
+
+		// If response is a string, try to parse as JSON, otherwise treat as text
 		if (typeof responseObj === "string") {
 			try {
-				responseObj = JSON.parse(responseObj);
-			} catch (e) {
-				console.error("Failed to parse response string as JSON", e);
+				const parsed = JSON.parse(responseObj);
+				responseObj = parsed;
+			} catch {
+				// Not JSON, treat as plain text
+				return {
+					text: responseObj,
+					adaptiveCard: null,
+				};
 			}
 		}
-		if (responseObj.response) {
-			if (typeof responseObj.response === "string") {
-				try {
-					responseObj = JSON.parse(responseObj.response);
-				} catch (e) {
-					console.error("Failed to parse nested response string as JSON", e);
-				}
-			} else {
-				responseObj = responseObj.response;
-			}
-		}
-		console.log("Parsed response object:", responseObj);
+
+		// If responseObj is now an object, extract fields
 		return {
 			text: responseObj.text || null,
 			adaptiveCard: responseObj.adaptiveCard || null,
-			fallback:
-				!responseObj.text && !responseObj.adaptiveCard ? responseObj : null,
 		};
 	}
 
@@ -99,7 +94,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 
 				if (response.ok) {
 					const data = await response.json();
-					const { text, adaptiveCard, fallback } = parseApiResponse(data);
+					const { text, adaptiveCard } = parseApiResponse(data);
 
 					//prioritize adaptiveCard over text
 					if (adaptiveCard) {
@@ -109,19 +104,12 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 							type: "adaptiveCard",
 							adaptiveContent: adaptiveCard,
 						});
-					} else if (text) {
+					} else {
 						console.log("Response data.text:", text);
 						addMessage({
 							role: "bot",
 							type: "text",
 							messageContent: text,
-						});
-					} else {
-						console.log("Only response found:", fallback);
-						addMessage({
-							role: "bot",
-							type: "text",
-							messageContent: JSON.stringify(fallback),
 						});
 					}
 				} else {
@@ -141,7 +129,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 
 		await fetchChatResponse({
 			"Content-Type": "application/json",
-			channel: "custom",
+			channel: "copilot",
 		});
 	};
 
