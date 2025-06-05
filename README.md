@@ -1,4 +1,5 @@
-Welcome to your new TanStack app!
+This is an agentic chatbot built in React with [Tanstack](https://tanstack.com/).
+It uses [Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) for authentication.
 
 # Getting Started
 
@@ -6,8 +7,14 @@ To run this application:
 
 Copy `.env.example` and rename the copy to `.env`. This file will be ignored by Git.
 
-In `.env`, update the value of `CHAT_ENDPOINT` to your chatbot API endpoint.
+In `.env`, update the value of the environment variables. The first is used by the [`ChatProvider`](./src/providers/ChatProvider.tsx) context component) and the rest are used by [`authConfig`](./src/auth/authConfig.ts).
 
+- `VITE_CHAT_ENDPOINT`: set to the URL of the FastAPI chat endpoint. Should be something like `https://[domain].azurewebsites.net/chat`
+- `VITE_ENTRA_APP_ID`: set this to the **Application (client) ID** of your registered Entra application. Refer to [Register an application](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) for more details.
+- `VITE_ENTRA_DIR_ID`: set this to the **Directory (tenant) ID** of your Entra application.
+- `VITE_ENTRA_REDIRECT_URI`: set this to the URL of your running application. If running locally, it will be `http://localhost:3000`.
+
+Next, install the Node requirements and start the application:
 ```bash
 npm install
 npm run start
@@ -52,9 +59,7 @@ This project uses [TanStack Router](https://tanstack.com/router). The initial se
 
 ### Adding A Route
 
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
+To add a new route to your application just add another a new file in the `./src/routes` directory. Tanstack will automatically scaffold out the boilerplate code for you.
 
 Now that you have two routes you can use a `Link` component to navigate between them.
 
@@ -78,7 +83,7 @@ More information on the `Link` component can be found in the [Link documentation
 
 ### Using A Layout
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
+In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component. In this modified app, you can edit the [`PageLayout`](./src/components/PageLayout.tsx) component.
 
 Here is an example layout that includes a header:
 
@@ -295,10 +300,6 @@ We use the `Derived` class to create a new store that is derived from another st
 Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
 
 You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
 
 # Learn More
 
