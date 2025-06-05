@@ -129,7 +129,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 
 		await fetchChatResponse({
 			"Content-Type": "application/json",
-			channel: "copilot",
+			Channel: "copilot",
+			"Session-Id": chatId,
 		});
 	};
 
