@@ -1,3 +1,7 @@
+import {
+	AuthenticatedTemplate,
+	UnauthenticatedTemplate,
+} from "@azure/msal-react";
 import { Tab, Tabs } from "@mui/material";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useLocation } from "@tanstack/react-router";
@@ -30,34 +34,37 @@ export function Footer() {
 	};
 
 	return (
-		<div className="bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200">
-			<Tabs
-				value={activeTab}
-				onChange={handleChange}
-				variant="fullWidth"
-				indicatorColor="primary"
-				textColor="primary"
-			>
-				<Tab value="/" title="Home" aria-label="Home" icon={<Home />} />
-				<Tab
-					value="/chat"
-					title="Chat"
-					aria-label="Chat"
-					icon={<MessageSquare />}
-				/>
-				<Tab
-					value="/new-request"
-					title="New Request"
-					aria-label="New Request"
-					icon={<ClipboardPlus />}
-				/>
-				<Tab
-					value="/track-request"
-					title="Track Request"
-					aria-label="Track Request"
-					icon={<ClipboardList />}
-				/>
-			</Tabs>
-		</div>
+		<footer className="bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200">
+			<AuthenticatedTemplate>
+				<Tabs
+					value={activeTab}
+					onChange={handleChange}
+					variant="fullWidth"
+					indicatorColor="primary"
+					textColor="primary"
+				>
+					<Tab value="/" title="Home" aria-label="Home" icon={<Home />} />
+					<Tab
+						value="/chat"
+						title="Chat"
+						aria-label="Chat"
+						icon={<MessageSquare />}
+					/>
+					<Tab
+						value="/new-request"
+						title="New Request"
+						aria-label="New Request"
+						icon={<ClipboardPlus />}
+					/>
+					<Tab
+						value="/track-request"
+						title="Track Request"
+						aria-label="Track Request"
+						icon={<ClipboardList />}
+					/>
+				</Tabs>
+			</AuthenticatedTemplate>
+			<UnauthenticatedTemplate>{null}</UnauthenticatedTemplate>
+		</footer>
 	);
 }
