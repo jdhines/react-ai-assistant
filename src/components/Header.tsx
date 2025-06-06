@@ -1,4 +1,5 @@
 import { Expand, Shrink } from "lucide-react";
+import { LogInOutButton } from "./LogInOutButton";
 
 interface HeaderProps {
 	expanded: boolean;
@@ -16,16 +17,20 @@ export function Header({ expanded, toggleExpand }: HeaderProps) {
 				/>
 				<span className="text-white">HQ Assistant</span>
 			</div>
-			<button
-				className="hover:bg-blue-700 p-1 rounded"
-				onClick={toggleExpand}
-				title={expanded ? "Collapse" : "Expand"}
-				type="button"
-			>
-				<span className="text-white cursor-pointer">
-					{expanded ? <Shrink /> : <Expand />}
-				</span>
-			</button>
+
+			<div id="header-actions" className="flex gap-4">
+				<LogInOutButton />
+				<button
+					className="hover:bg-blue-700 p-1 rounded"
+					onClick={toggleExpand}
+					title={expanded ? "Collapse" : "Expand"}
+					type="button"
+				>
+					<span className="text-white cursor-pointer">
+						{expanded ? <Shrink /> : <Expand />}
+					</span>
+				</button>
+			</div>
 		</header>
 	);
 }
