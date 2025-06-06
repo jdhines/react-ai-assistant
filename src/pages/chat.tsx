@@ -10,15 +10,23 @@ import { ChatContext } from "~/providers/ChatProvider";
 export function ChatPage() {
 	const [userInput, setUserInput] = React.useState("");
 	const { messages, sendMessage, isLoading } = useChatMessages();
-	const { chatId, getNewChatId, resetChat } = React.useContext(ChatContext);
+	const chatContext = React.useContext(ChatContext);
+	if (!chatContext) {
+		throw new Error(
+			"Error getting context. Make sure ChatProvider is in the component tree.",
+		);
+	}
+	const { chatId, getNewChatId, resetChat } = chatContext;
 	const navigate = useNavigate();
 
-	const handleSendMessage = async (message: string) => {
+	const handleSendMessage = async () => {
+		if (!userInput.trim()) return;
 		setUserInput("");
-		await sendMessage(message);
+		await sendMessage(userInput);
 	};
 
 	const handleNewChat = () => {
+		if (!getNewChatId || !resetChat) return;
 		setUserInput("");
 		const nextChatId = getNewChatId();
 		resetChat(nextChatId);
@@ -32,15 +40,14 @@ export function ChatPage() {
 		<div id="chat-page" className="flex flex-col flex-1 bg-white">
 			<ChatHeader chatId={chatId} onNewChat={handleNewChat} />
 			<ChatMessageList messages={messages} />
-			{isLoading && (
-				<div className="flex items-center p-4">
-					<LoadingGradientBar />
-				</div>
-			)}
+			{isLoading && <LoadingGradientBar />}
 			<ChatInput
 				userInput={userInput}
 				onUserInputChange={setUserInput}
-				onSubmit={handleSendMessage}
+				onSubmit={(e) => {
+					e.preventDefault();
+					handleSendMessage();
+				}}
 				disabled={isLoading}
 			/>
 		</div>

@@ -33,10 +33,12 @@ export function ChatInput({
 					onChange={(e) => onUserInputChange(e.target.value)}
 					placeholder="Type your message. Enter 'adaptive' for a sample adaptive card."
 					className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					disabled={disabled}
 				/>
 				<button
 					type="submit"
 					className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-1"
+					disabled={disabled}
 				>
 					<Send className="w-4 h-4" />
 					<VisuallyHidden>Send</VisuallyHidden>

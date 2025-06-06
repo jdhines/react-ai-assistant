@@ -9,10 +9,11 @@ import { ChatContext } from "../providers/ChatProvider";
   * It enforces the error check if the context is missing.
 */
 export function useChatMessages() {
-  const context = React.useContext(ChatContext);
-  if (!context) {
-    throw new Error("useChatMessages must be used within a ChatProvider");
-  }
-  const { messages, sendMessage, isLoading } = context;
-  return { messages, sendMessage, isLoading };
+	const context = React.useContext(ChatContext);
+	if (!context) {
+		throw new Error("useChatMessages must be used within a ChatProvider");
+	}
+	const { messages, sendMessage, isLoading, chatId, getNewChatId, resetChat } =
+		context;
+	return { messages, sendMessage, isLoading, chatId, getNewChatId, resetChat };
 }

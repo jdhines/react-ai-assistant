@@ -103,6 +103,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 							role: "bot",
 							type: "adaptiveCard",
 							adaptiveContent: adaptiveCard,
+							messageContent: text,
 						});
 					} else {
 						console.log("Response data.text:", text);
