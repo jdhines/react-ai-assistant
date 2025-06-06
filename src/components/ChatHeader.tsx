@@ -7,7 +7,10 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ chatId, onNewChat }: ChatHeaderProps) {
 	return (
-		<div className="flex px-4 justify-between items-center">
+		<div
+			id="chat-header"
+			className="sticky top-0 flex px-4 justify-between items-center border border-gray-100 bg-white"
+		>
 			<BackButton to="/" />
 			<button
 				type="button"

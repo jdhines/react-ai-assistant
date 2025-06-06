@@ -29,7 +29,7 @@ export function ChatPage() {
 	};
 
 	return (
-		<div className="flex-1 flex flex-col min-h-0 bg-white">
+		<div id="chat-page" className="flex flex-col flex-1 bg-white">
 			<ChatHeader chatId={chatId} onNewChat={handleNewChat} />
 			<ChatMessageList messages={messages} />
 			{isLoading && (

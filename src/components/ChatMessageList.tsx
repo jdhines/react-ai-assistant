@@ -19,10 +19,15 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 	}, [messages]);
 
 	return (
-		<div className="flex-1 flex flex-col gap-4 overflow-y-auto p-4 scroll-smooth">
-			{messages.map((msg) => (
-				<ChatMessage key={msg.id} {...msg} />
-			))}
+		<div
+			id="chat-message-list"
+			className="flex-1 min-h-0 h-full flex flex-col gap-4 overflow-y-auto p-4 scroll-smooth"
+		>
+			{messages.length === 0 ? (
+				<div className="flex-1" />
+			) : (
+				messages.map((msg) => <ChatMessage key={msg.id} {...msg} />)
+			)}
 			<div ref={bottomRef} />
 		</div>
 	);
@@ -30,7 +35,7 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 
 function ChatMessage(props: ChatMessageProps) {
 	const { role, messageContent, adaptiveContent, type, timestamp } = props;
-	//TODO: Remove example of adaptive card
+	console.log("Rendering ChatMessage:", props);
 	const handleError = (error: Error) => {
 		console.error("Adaptive Card error:", error);
 	};
@@ -38,7 +43,7 @@ function ChatMessage(props: ChatMessageProps) {
 		fontFamily: "Segoe UI, Helvetica Neue, sans-serif",
 	};
 	return (
-		<div className={role === "user" ? "justify-end" : "justify-start"}>
+		<div id="chat-messages" className="mb-4">
 			<div
 				className={`flex items-start space-x-2 max-w-2xl ${role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
 			>
