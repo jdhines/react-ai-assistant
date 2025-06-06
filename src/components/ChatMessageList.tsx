@@ -73,7 +73,9 @@ function ChatMessage(props: ChatMessageProps) {
 								hostConfig={hostConfig}
 							/>
 						) : (
-							<ReactMarkdown>{messageContent}</ReactMarkdown>
+							<div className="markdown-body">
+								<ReactMarkdown>{messageContent}</ReactMarkdown>
+							</div>
 						)}
 					</div>
 
