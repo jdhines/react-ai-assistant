@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { MessageCircleX } from "lucide-react";
 import React from "react";
 import { ChatHeader } from "~/components/ChatHeader";
 import { ChatInput } from "~/components/ChatInput";
@@ -9,14 +10,21 @@ import { ChatContext } from "~/providers/ChatProvider";
 
 export function ChatPage() {
 	const [userInput, setUserInput] = React.useState("");
-	const { messages, sendMessage, isLoading } = useChatMessages();
+	const {
+		chatId,
+		getNewChatId,
+		resetChat,
+		messages,
+		sendMessage,
+		isLoading,
+		cancel,
+	} = useChatMessages();
 	const chatContext = React.useContext(ChatContext);
 	if (!chatContext) {
 		throw new Error(
 			"Error getting context. Make sure ChatProvider is in the component tree.",
 		);
 	}
-	const { chatId, getNewChatId, resetChat } = chatContext;
 	const navigate = useNavigate();
 
 	const handleSendMessage = async () => {

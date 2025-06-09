@@ -13,7 +13,22 @@ export function useChatMessages() {
 	if (!context) {
 		throw new Error("useChatMessages must be used within a ChatProvider");
 	}
-	const { messages, sendMessage, isLoading, chatId, getNewChatId, resetChat } =
-		context;
-	return { messages, sendMessage, isLoading, chatId, getNewChatId, resetChat };
+	const {
+		messages,
+		sendMessage,
+		isLoading,
+		chatId,
+		getNewChatId,
+		resetChat,
+		cancel,
+	} = context;
+	return {
+		messages,
+		sendMessage,
+		isLoading,
+		chatId,
+		getNewChatId,
+		resetChat,
+		cancel,
+	};
 }

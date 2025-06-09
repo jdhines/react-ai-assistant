@@ -8,6 +8,7 @@ type ChatContextType = {
 	messages: ChatMessageProps[];
 	sendMessage: (userInput: string) => Promise<void>;
 	isLoading: boolean;
+	cancel: () => void; // Add this line
 };
 
 type ChatMessageParams = {
@@ -23,6 +24,8 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 	const [chatId, setChatId] = React.useState("");
 	const [messages, setMessages] = React.useState<ChatMessageProps[]>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
+	const [abortController, setAbortController] =
+		React.useState<AbortController | null>(null);
 	const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT;
 
 	const getNewChatId = () => {
@@ -75,8 +78,17 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 		};
 	}
 
+	const cancel = React.useCallback(() => {
+		if (abortController) {
+			abortController.abort();
+			setIsLoading(false);
+		}
+	}, [abortController]);
+
 	const sendMessage = async (userInput: string) => {
 		setIsLoading(true);
+		const controller = new AbortController();
+		setAbortController(controller);
 		addMessage({
 			role: "user",
 			type: "text",
@@ -90,6 +102,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 					method: "POST",
 					headers,
 					body: JSON.stringify({ input: userInput }),
+					signal: controller.signal, // Pass the signal
 				});
 
 				if (response.ok) {
@@ -117,14 +130,19 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 					throw new Error("Failed to fetch response from server");
 				}
 			} catch (error) {
-				console.error("Error while sending message:", error);
-				addMessage({
-					role: "bot",
-					type: "text",
-					messageContent: "Sorry, I encountered an error. Please try again.",
-				});
+				if ((error as any).name === "AbortError") {
+					console.error("Request was aborted");
+				} else {
+					console.error("Error while sending message:", error);
+					addMessage({
+						role: "bot",
+						type: "text",
+						messageContent: "Sorry, I encountered an error. Please try again.",
+					});
+				}
 			} finally {
 				setIsLoading(false);
+				setAbortController(null);
 			}
 		};
 
@@ -144,6 +162,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 				messages,
 				sendMessage,
 				isLoading,
+				cancel, // Add this line
 			}}
 		>
 			{children}
