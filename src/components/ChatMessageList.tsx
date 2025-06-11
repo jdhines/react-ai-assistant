@@ -35,7 +35,6 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 
 function ChatMessage(props: ChatMessageProps) {
 	const { role, messageContent, adaptiveContent, type, timestamp } = props;
-	console.log("Rendering ChatMessage:", props);
 	const handleError = (error: Error) => {
 		console.error("Adaptive Card error:", error);
 	};

@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { MessageCircleX } from "lucide-react";
 import React from "react";
 import { ChatHeader } from "~/components/ChatHeader";
 import { ChatInput } from "~/components/ChatInput";
@@ -8,8 +7,10 @@ import { LoadingGradientBar } from "~/components/LoadingGradientBar";
 import { useChatMessages } from "~/hooks/useChatMessage";
 import { ChatContext } from "~/providers/ChatProvider";
 
+
 export function ChatPage() {
 	const [userInput, setUserInput] = React.useState("");
+
 	const {
 		chatId,
 		getNewChatId,
@@ -17,7 +18,6 @@ export function ChatPage() {
 		messages,
 		sendMessage,
 		isLoading,
-		cancel,
 	} = useChatMessages();
 	const chatContext = React.useContext(ChatContext);
 	if (!chatContext) {
