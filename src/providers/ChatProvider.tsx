@@ -8,7 +8,11 @@ type ChatContextType = {
 	messages: ChatMessageProps[];
 	sendMessage: (userInput: string) => Promise<void>;
 	isLoading: boolean;
-	cancel: () => void; // Add this line
+	cancel: () => void;
+	isStreaming: boolean;
+	isAdaptiveCard: boolean;
+	setIsStreaming: (value: boolean) => void;
+	setIsAdaptiveCard: (value: boolean) => void;
 };
 
 type ChatMessageParams = {
@@ -23,6 +27,8 @@ export const ChatContext = React.createContext<ChatContextType | null>(null);
 function ChatProvider({ children }: { children: React.ReactNode }) {
 	const [chatId, setChatId] = React.useState("");
 	const [messages, setMessages] = React.useState<ChatMessageProps[]>([]);
+	const [isStreaming, setIsStreaming] = React.useState(false);
+	const [isAdaptiveCard, setIsAdaptiveCard] = React.useState(false);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [abortController, setAbortController] =
 		React.useState<AbortController | null>(null);
@@ -148,7 +154,7 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 
 		await fetchChatResponse({
 			"Content-Type": "application/json",
-			Channel: "copilot",
+			Channel: isAdaptiveCard ? "custom" : "default",
 			"Session-Id": chatId,
 		});
 	};
@@ -162,7 +168,11 @@ function ChatProvider({ children }: { children: React.ReactNode }) {
 				messages,
 				sendMessage,
 				isLoading,
-				cancel, // Add this line
+				cancel,
+				isStreaming,
+				setIsStreaming,
+				isAdaptiveCard,
+				setIsAdaptiveCard,
 			}}
 		>
 			{children}

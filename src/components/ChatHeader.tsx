@@ -1,4 +1,5 @@
 import { BackButton } from "~/components/BackButton";
+import { ChatSettingsToggles } from "./ChatSettingsToggle";
 
 interface ChatHeaderProps {
 	chatId?: string;
@@ -12,6 +13,7 @@ export function ChatHeader({ chatId, onNewChat }: ChatHeaderProps) {
 			className="sticky top-0 flex px-4 justify-between items-center border border-gray-100 bg-white"
 		>
 			<BackButton to="/" />
+			<ChatSettingsToggles />
 			<button
 				type="button"
 				onClick={onNewChat}
