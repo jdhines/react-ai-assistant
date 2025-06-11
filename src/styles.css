@@ -14,18 +14,16 @@ code {
 		monospace;
 }
 
-.markdown-body ol {
+#chat-messages ol {
 	list-style-type: decimal !important;
-	margin-left: 1.5rem;
-	padding-left: 0.5rem;
+	margin-left: 1rem;
 }
 
-.markdown-body ul {
+#chat-messages ul {
 	list-style-type: disc !important;
-	margin-left: 1.5rem;
-	padding-left: 0.5rem;
+	margin-left: 1rem;
 }
 
-.markdown-body li {
+#chat-messages li {
 	margin-bottom: 0.25rem;
 }
