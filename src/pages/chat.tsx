@@ -1,3 +1,4 @@
+import { useChatData } from "@chainlit/react-client";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { ChatHeader } from "~/components/ChatHeader";
@@ -7,18 +8,10 @@ import { LoadingGradientBar } from "~/components/LoadingGradientBar";
 import { useChatMessages } from "~/hooks/useChatMessage";
 import { ChatContext } from "~/providers/ChatProvider";
 
-
 export function ChatPage() {
 	const [userInput, setUserInput] = React.useState("");
-
-	const {
-		chatId,
-		getNewChatId,
-		resetChat,
-		messages,
-		sendMessage,
-		isLoading,
-	} = useChatMessages();
+	const { chatId, getNewChatId, resetChat, messages, sendMessage, isLoading } =
+		useChatMessages();
 	const chatContext = React.useContext(ChatContext);
 	if (!chatContext) {
 		throw new Error(
@@ -46,7 +39,7 @@ export function ChatPage() {
 
 	return (
 		<div id="chat-page" className="flex flex-col flex-1 bg-white">
-			<ChatHeader chatId={chatId} onNewChat={handleNewChat} />
+			<ChatHeader onNewChat={handleNewChat} />
 			<ChatMessageList messages={messages} />
 			{isLoading && <LoadingGradientBar />}
 			<ChatInput

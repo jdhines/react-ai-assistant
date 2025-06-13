@@ -1,5 +1,6 @@
 import { Send } from "lucide-react";
 import type { FormEvent } from "react";
+import { useRef } from "react";
 import { VisuallyHidden } from "./VisuallyHidden";
 interface ChatInputProps {
 	userInput: string;
@@ -14,10 +15,16 @@ export function ChatInput({
 	onSubmit,
 	disabled,
 }: ChatInputProps) {
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
 		if (userInput.trim()) {
 			onSubmit(e);
+			// Refocus the input after submission
+			setTimeout(() => {
+				inputRef.current?.focus();
+			}, 0);
 		}
 	};
 
@@ -26,8 +33,10 @@ export function ChatInput({
 			id="chat-input"
 			className="sticky bottom-0 bg-white border-t border-gray-200 p-4"
 		>
+			{" "}
 			<form onSubmit={handleSubmit} className="flex space-x-2">
 				<input
+					ref={inputRef}
 					type="text"
 					value={userInput}
 					onChange={(e) => onUserInputChange(e.target.value)}
