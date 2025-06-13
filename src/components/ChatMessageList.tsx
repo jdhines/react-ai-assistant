@@ -1,4 +1,4 @@
-import { Bot, Send, User } from "lucide-react";
+import { Bot, User } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { AdaptiveCard } from "~/components/adaptivecards-react/adaptive-card";
@@ -21,7 +21,7 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
 	return (
 		<div
 			id="chat-message-list"
-			className="flex-1 min-h-0 h-full flex flex-col gap-4 overflow-y-auto p-4 scroll-smooth"
+			className="flex-1 min-h-96 h-full flex flex-col gap-4 overflow-y-auto p-4 scroll-smooth"
 		>
 			{messages.length === 0 ? (
 				<div className="flex-1" />

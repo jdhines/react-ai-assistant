@@ -21,8 +21,6 @@ export function useChatMessages() {
 		getNewChatId,
 		resetChat,
 		cancel,
-		isStreaming,
-		setIsStreaming,
 		isAdaptiveCard,
 		setIsAdaptiveCard,
 	} = context;
@@ -34,8 +32,6 @@ export function useChatMessages() {
 		getNewChatId,
 		resetChat,
 		cancel,
-		isStreaming,
-		setIsStreaming,
 		isAdaptiveCard,
 		setIsAdaptiveCard,
 	};
