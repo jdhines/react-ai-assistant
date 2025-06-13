@@ -2,11 +2,10 @@ import { BackButton } from "~/components/BackButton";
 import { ChatSettingsToggles } from "./ChatSettingsToggle";
 
 interface ChatHeaderProps {
-	chatId?: string;
 	onNewChat: () => void;
 }
 
-export function ChatHeader({ chatId, onNewChat }: ChatHeaderProps) {
+export function ChatHeader({ onNewChat }: ChatHeaderProps) {
 	return (
 		<div
 			id="chat-header"

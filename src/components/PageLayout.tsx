@@ -13,7 +13,7 @@ export function PageLayout({
 
 	return (
 		<main
-			className={`min-h-96 fixed bottom-6 right-6 ${expanded ? "max-w-[840px] w-[840px] max-h-[95vh] h-[95vh]" : "w-[560px] max-h-[95vh]"} flex flex-col bg-white rounded-lg shadow-lg border border-gray-200`}
+			className={`min-h-1/2 fixed bottom-6 right-6 ${expanded ? "max-w-[840px] w-[840px] max-h-[95vh] h-[95vh]" : "w-[560px] max-h-[95vh]"} flex flex-col bg-white rounded-lg shadow-lg border border-gray-200`}
 			style={{ zIndex: 50 }}
 		>
 			<Header expanded={expanded} toggleExpand={toggleExpand} />
