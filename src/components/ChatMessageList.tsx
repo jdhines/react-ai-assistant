@@ -44,18 +44,27 @@ function ChatMessage(props: ChatMessageProps) {
 	return (
 		<div id="chat-messages" className="mb-4">
 			<div
-				className={`flex items-start space-x-2 max-w-2xl ${role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+				className={`max-w-2xl ${role === "user" ? "flex items-start flex-row-reverse space-x-2 space-x-reverse" : ""}`}
 			>
 				{/* Avatar */}
 				<div
-					className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-						role === "user" ? "bg-blue-600" : "bg-gray-600"
+					className={`${
+						role === "user"
+							? "bg-blue-600 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+							: ""
 					}`}
 				>
 					{role === "user" ? (
 						<User className="w-4 h-4 text-white" />
 					) : (
-						<Bot className="w-4 h-4 text-white" />
+						<p>
+							<img
+								className="inline-block"
+								src="/public/favicon-32x32.png"
+								alt="assistant"
+							/>
+							<span className="font-bold">HQ Assistant</span>
+						</p>
 					)}
 				</div>
 
@@ -64,10 +73,10 @@ function ChatMessage(props: ChatMessageProps) {
 					className={`flex flex-col space-y-2 ${role === "user" ? "items-end" : "items-start"}`}
 				>
 					<div
-						className={`rounded-lg px-4 py-2 ${
+						className={`rounded-lg px-8 py-2 ${
 							role === "user"
 								? "bg-blue-600 text-white"
-								: "bg-white text-gray-800 border border-gray-200"
+								: "bg-white text-gray-800"
 						}`}
 					>
 						{type === "adaptiveCard" ? (
@@ -83,7 +92,9 @@ function ChatMessage(props: ChatMessageProps) {
 						)}
 					</div>
 
-					<span className="text-xs text-gray-500">
+					<span
+						className={`text-xs text-gray-500 ${role === "bot" ? "pl-8" : ""}`}
+					>
 						{timestamp ? timestamp.toLocaleTimeString() : ""}
 					</span>
 				</div>
