@@ -14,6 +14,22 @@ code {
 		monospace;
 }
 
+.copilotKitChat {
+  /* flex-grow: 1; */
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+}
+ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+}
+ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
 /* Markdown styling improvements */
 .markdown-body h1,
 .markdown-body h2,
@@ -71,4 +87,26 @@ code {
 
 #chat-messages li {
 	margin-bottom: 0.25rem;
+}
+
+.copilotKitMessages {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.copilotKitInputContainer {
+	position: sticky;
+	bottom: 0;
+	z-index: 10;
+	margin-bottom:.25rem;
+}
+
+/* Optional: Add some padding to prevent content from being hidden behind sticky elements */
+.copilotKitMessagesContainer {
+	padding-bottom: 1rem;
+}
+
+.poweredByContainer div:last-child {
+	display: none
 }

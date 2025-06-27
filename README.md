@@ -5,17 +5,11 @@ It uses [Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-pl
 
 To run this application:
 
-Copy `.env.example` and rename the copy to `.env`. This file will be ignored by Git.
+1. Clone the [minimal-copilotkit-langgraph](https://github.com/jdhines/minimal-copilotkit-langgraph) repo and get the runtime and langgraph service parts running.
 
-In `.env`, update the value of the environment variables. The first is used by the [`ChatProvider`](./src/providers/ChatProvider.tsx) context component) and the rest are used by [`authConfig`](./src/auth/authConfig.ts).
+2. Next, install the Node requirements and start the application:
 
-- `VITE_CHAT_ENDPOINT`: set to the URL of the FastAPI chat endpoint. Should be something like `https://[domain].azurewebsites.net/chat`
-- `VITE_ENTRA_APP_ID`: set this to the **Application (client) ID** of your registered Entra application. Refer to [Register an application](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) for more details.
-- `VITE_ENTRA_DIR_ID`: set this to the **Directory (tenant) ID** of your Entra application.
-- `VITE_ENTRA_REDIRECT_URI`: set this to the URL of your running application. If running locally, it will be `http://localhost:3000`.
-
-Next, install the Node requirements and start the application:
-```bash
+```sh
 npm install
 npm run start
 ```
@@ -45,16 +39,14 @@ This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
 
 This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
 
-
 ```bash
 npm run lint
 npm run format
 npm run check
 ```
 
-
-
 ## Routing
+
 This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
 
 ### Adding A Route

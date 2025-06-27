@@ -1,62 +1,36 @@
-import { useNavigate } from "@tanstack/react-router";
-import React from "react";
 import { ChatHeader } from "~/components/ChatHeader";
-import { ChatInput } from "~/components/ChatInput";
-import { ChatMessageList } from "~/components/ChatMessageList";
-import { LoadingGradientBar } from "~/components/LoadingGradientBar";
-import { useChatMessages } from "~/hooks/useChatMessage";
-import { ChatContext } from "~/providers/ChatProvider";
+import { CopilotChat } from '@copilotkit/react-ui'
+import { useCopilotChat } from "@copilotkit/react-core";
+import { isAdaptiveCardMessage } from "~/types/ChatMessageProps";
+import { renderTextMessage } from "~/utils/renderTextMessage";
+import React from "react";
 
 
 export function ChatPage() {
-	const [userInput, setUserInput] = React.useState("");
+	const { reset, visibleMessages } = useCopilotChat();
 
-	const {
-		chatId,
-		getNewChatId,
-		resetChat,
-		messages,
-		sendMessage,
-		isLoading,
-	} = useChatMessages();
-	const chatContext = React.useContext(ChatContext);
-	if (!chatContext) {
-		throw new Error(
-			"Error getting context. Make sure ChatProvider is in the component tree.",
-		);
-	}
-	const navigate = useNavigate();
+	//TODO: remove this logging when no longer needed
+	React.useEffect(() => {
+		console.log("Visible messages:", visibleMessages);
+	}, [visibleMessages]);
 
-	const handleSendMessage = async () => {
-		if (!userInput.trim()) return;
-		setUserInput("");
-		await sendMessage(userInput);
-	};
-
-	const handleNewChat = () => {
-		if (!getNewChatId || !resetChat) return;
-		setUserInput("");
-		const nextChatId = getNewChatId();
-		resetChat(nextChatId);
-		navigate({
-			to: `/chat/${nextChatId}`,
-			replace: true,
-		});
-	};
+	// TODO: the use of this to use a custom RenderTextMessage function is an example only
+	/*
+		It doesn't actually work, as there backend isn't handling adaptive cards yet,
+		and hence not sending anything that the isAdaptiveCardMessage function would return true for.
+	*/
+	const hasAdaptiveCards = visibleMessages.some((msg: any) => isAdaptiveCardMessage(msg.content))
 
 	return (
-		<div id="chat-page" className="flex flex-col flex-1 bg-white">
-			<ChatHeader chatId={chatId} onNewChat={handleNewChat} />
-			<ChatMessageList messages={messages} />
-			{isLoading && <LoadingGradientBar />}
-			<ChatInput
-				userInput={userInput}
-				onUserInputChange={setUserInput}
-				onSubmit={(e) => {
-					e.preventDefault();
-					handleSendMessage();
+		<div id="chat-page" className="h-[100vh] overflow-hidden flex flex-col flex-1 bg-white">
+			<ChatHeader onNewChat={reset} />
+			<CopilotChat
+				instructions={"You are assisting the user as best as you can. Answer in the best way possible given the data you have."}
+				labels={{
+					title: "Sidebar Assistant",
+					initial: "How can I help you today?",
 				}}
-				disabled={isLoading}
+				{...(hasAdaptiveCards ? { RenderTextMessage: renderTextMessage } : {})}
 			/>
 		</div>
 	);

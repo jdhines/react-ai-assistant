@@ -8,130 +8,150 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as TrackRequestRouteImport } from './routes/track-request'
-import { Route as NewRequestRouteImport } from './routes/new-request'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ChatIndexRouteImport } from './routes/chat/index'
-import { Route as ChatChatIdRouteImport } from './routes/chat/$chatId'
+// Import Routes
 
-const TrackRequestRoute = TrackRequestRouteImport.update({
+import { Route as rootRoute } from './routes/__root'
+import { Route as TrackRequestImport } from './routes/track-request'
+import { Route as NewRequestImport } from './routes/new-request'
+import { Route as ChatImport } from './routes/chat'
+import { Route as IndexImport } from './routes/index'
+
+// Create/Update Routes
+
+const TrackRequestRoute = TrackRequestImport.update({
   id: '/track-request',
   path: '/track-request',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewRequestRoute = NewRequestRouteImport.update({
-  id: '/new-request',
-  path: '/new-request',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatIndexRoute = ChatIndexRouteImport.update({
-  id: '/chat/',
-  path: '/chat/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatChatIdRoute = ChatChatIdRouteImport.update({
-  id: '/chat/$chatId',
-  path: '/chat/$chatId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
 
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/new-request': typeof NewRequestRoute
-  '/track-request': typeof TrackRequestRoute
-  '/chat/$chatId': typeof ChatChatIdRoute
-  '/chat': typeof ChatIndexRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/new-request': typeof NewRequestRoute
-  '/track-request': typeof TrackRequestRoute
-  '/chat/$chatId': typeof ChatChatIdRoute
-  '/chat': typeof ChatIndexRoute
-}
-export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/new-request': typeof NewRequestRoute
-  '/track-request': typeof TrackRequestRoute
-  '/chat/$chatId': typeof ChatChatIdRoute
-  '/chat/': typeof ChatIndexRoute
-}
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/new-request' | '/track-request' | '/chat/$chatId' | '/chat'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/new-request' | '/track-request' | '/chat/$chatId' | '/chat'
-  id:
-    | '__root__'
-    | '/'
-    | '/new-request'
-    | '/track-request'
-    | '/chat/$chatId'
-    | '/chat/'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  NewRequestRoute: typeof NewRequestRoute
-  TrackRequestRoute: typeof TrackRequestRoute
-  ChatChatIdRoute: typeof ChatChatIdRoute
-  ChatIndexRoute: typeof ChatIndexRoute
-}
+const NewRequestRoute = NewRequestImport.update({
+  id: '/new-request',
+  path: '/new-request',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatRoute = ChatImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+// Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/track-request': {
-      id: '/track-request'
-      path: '/track-request'
-      fullPath: '/track-request'
-      preLoaderRoute: typeof TrackRequestRouteImport
-      parentRoute: typeof rootRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatImport
+      parentRoute: typeof rootRoute
     }
     '/new-request': {
       id: '/new-request'
       path: '/new-request'
       fullPath: '/new-request'
-      preLoaderRoute: typeof NewRequestRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof NewRequestImport
+      parentRoute: typeof rootRoute
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat/': {
-      id: '/chat/'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat/$chatId': {
-      id: '/chat/$chatId'
-      path: '/chat/$chatId'
-      fullPath: '/chat/$chatId'
-      preLoaderRoute: typeof ChatChatIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/track-request': {
+      id: '/track-request'
+      path: '/track-request'
+      fullPath: '/track-request'
+      preLoaderRoute: typeof TrackRequestImport
+      parentRoute: typeof rootRoute
     }
   }
 }
 
+// Create and export the route tree
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/new-request': typeof NewRequestRoute
+  '/track-request': typeof TrackRequestRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/new-request': typeof NewRequestRoute
+  '/track-request': typeof TrackRequestRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/chat': typeof ChatRoute
+  '/new-request': typeof NewRequestRoute
+  '/track-request': typeof TrackRequestRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/chat' | '/new-request' | '/track-request'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/chat' | '/new-request' | '/track-request'
+  id: '__root__' | '/' | '/chat' | '/new-request' | '/track-request'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRoute
+  NewRequestRoute: typeof NewRequestRoute
+  TrackRequestRoute: typeof TrackRequestRoute
+}
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChatRoute: ChatRoute,
   NewRequestRoute: NewRequestRoute,
   TrackRequestRoute: TrackRequestRoute,
-  ChatChatIdRoute: ChatChatIdRoute,
-  ChatIndexRoute: ChatIndexRoute,
 }
-export const routeTree = rootRouteImport
+
+export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/chat",
+        "/new-request",
+        "/track-request"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/chat": {
+      "filePath": "chat.tsx"
+    },
+    "/new-request": {
+      "filePath": "new-request.tsx"
+    },
+    "/track-request": {
+      "filePath": "track-request.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
