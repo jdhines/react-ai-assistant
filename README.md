@@ -1,11 +1,13 @@
-This is an agentic chatbot built in React with [Tanstack](https://tanstack.com/).
-It uses [Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app) for authentication.
+# Overview
 
-# Getting Started
+This is an agentic chatbot built in React with [Tanstack](https://tanstack.com/).
+It uses CopilotKit to enable AI conversations.
+
+## Getting Started
 
 To run this application:
 
-1. Clone the [minimal-copilotkit-langgraph](https://github.com/jdhines/minimal-copilotkit-langgraph) repo and get the runtime and langgraph service parts running.
+1. Get Copilotkit runtime and langgraph service parts running. See the [README](/backend/README.md) for instructions.
 
 2. Next, install the Node requirements and start the application:
 
@@ -14,7 +16,7 @@ npm install
 npm run start
 ```
 
-# Building For Production
+## Building For Production
 
 To build this application for production:
 
@@ -33,7 +35,6 @@ npm run test
 ## Styling
 
 This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
 
 ## Linting & Formatting
 
@@ -104,7 +105,6 @@ export const Route = createRootRoute({
 The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
 
 More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
 
 ## Data Fetching
 
