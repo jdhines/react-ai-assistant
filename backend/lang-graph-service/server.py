@@ -5,13 +5,13 @@ through our FastAPI integration. However, you can also host in LangGraph platfor
 import os
 import uvicorn
 from fastapi import FastAPI
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from copilotkit.integrations.fastapi import add_fastapi_endpoint
 from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
 # the coagents-starter path, replace this if its different
 from sample_agent.agent import graph
 
-load_dotenv()
+os.environ.update(dotenv_values())  # Load environment variables from .env file
 
 app = FastAPI()
 
