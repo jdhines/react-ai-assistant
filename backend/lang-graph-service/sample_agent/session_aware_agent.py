@@ -27,7 +27,6 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
             hours_threshold: Hours to look back for recent conversations (default: 3)
             **kwargs: Other arguments passed to LangGraphAgent
         """
-        print(f"🔧 Initializing SessionAwareLangGraphAgent")
         super().__init__(**kwargs)
         self.checkpointer = checkpointer
         self.hours_threshold = hours_threshold
@@ -37,67 +36,42 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
         Ensure a thread_id exists in config, either by restoring a recent session
         or creating a new one.
         """
-        # Debug: Print the entire config to understand the structure
-        print(f"🔍 DEBUG: Full config structure: {config}")
-
         configurable = config.get("configurable", {})
-        print(f"🔍 DEBUG: configurable section: {configurable}")
 
         # Try to get user_id from different possible locations
-        user_id = configurable.get("user_id")
-        if not user_id:
-            # Check if CopilotKit puts properties elsewhere
-            user_id = config.get("user_id")
-        if not user_id:
-            # Check for other common property names
-            user_id = configurable.get("userId")
-        if not user_id:
-            user_id = config.get("userId")
-
-        print(f"🔍 DEBUG: Extracted user_id: {user_id}")
+        user_id = (
+            configurable.get("user_id") or
+            config.get("user_id") or
+            configurable.get("userId") or
+            config.get("userId")
+        )
 
         thread_id = configurable.get("thread_id")
-        print(f"🔍 DEBUG: Extracted thread_id: {thread_id}")
 
         # If no user_id provided, create a new thread
         if not user_id:
             new_thread_id = str(uuid.uuid4())
             config["configurable"] = {
                 **configurable, "thread_id": new_thread_id}
-            print(
-                f"⚠️  No user_id found, creating anonymous session {new_thread_id[:8]}...")
             return config
 
-        # ALWAYS check for recent session restoration, even if thread_id exists
-        # This allows us to restore sessions on page refresh
+        # Always check for recent session restoration to support page refresh
         recent_thread_id = await self.checkpointer.get_recent_active_conversation(
             user_id, self.hours_threshold
         )
 
         if recent_thread_id:
-            # Force restore recent session, even if a different thread_id was provided
-            if thread_id and thread_id != recent_thread_id:
-                print(
-                    f"🔄 Overriding CopilotKit thread_id {thread_id[:8]}... with recent session {recent_thread_id[:8]}... for user {user_id}")
-            else:
-                print(
-                    f"🔄 Restoring recent session {recent_thread_id[:8]}... for user {user_id}")
-
+            # Restore recent session (override any provided thread_id)
             config["configurable"] = {
-                **configurable, "thread_id": recent_thread_id, "user_id": user_id}
+                **configurable, "thread_id": recent_thread_id, "user_id": user_id
+            }
         else:
             # Use provided thread_id or create new session
-            if thread_id:
-                config["configurable"] = {
-                    **configurable, "thread_id": thread_id, "user_id": user_id}
-                print(
-                    f"🆕 Using provided thread_id {thread_id[:8]}... for user {user_id}")
-            else:
-                new_thread_id = str(uuid.uuid4())
-                config["configurable"] = {
-                    **configurable, "thread_id": new_thread_id, "user_id": user_id}
-                print(
-                    f"🆕 Creating new session {new_thread_id[:8]}... for user {user_id}")
+            if not thread_id:
+                thread_id = str(uuid.uuid4())
+            config["configurable"] = {
+                **configurable, "thread_id": thread_id, "user_id": user_id
+            }
 
         return config
 
@@ -105,10 +79,6 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
         """
         Async invoke with automatic session management.
         """
-        print(
-            f"🚀 SessionAwareLangGraphAgent.ainvoke called with input_data: {input_data}")
-        print(f"🚀 SessionAwareLangGraphAgent.ainvoke config: {config}")
-
         if config is None:
             config = {}
 
@@ -142,9 +112,6 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
         """
         Async stream with automatic session management.
         """
-        print(
-            f"🌊 SessionAwareLangGraphAgent.astream called with input_data: {input_data}")
-        print(f"🌊 SessionAwareLangGraphAgent.astream config: {config}")
 
         if config is None:
             config = {}
