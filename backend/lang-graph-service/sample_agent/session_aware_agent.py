@@ -33,8 +33,8 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
 
     async def _ensure_thread_id(self, config: RunnableConfig) -> RunnableConfig:
         """
-        Ensure a thread_id exists in config, either by restoring a recent session
-        or creating a new one.
+        Ensure a thread_id exists in config.
+        New strategy: Each user has exactly one persistent conversation.
         """
         configurable = config.get("configurable", {})
 
@@ -46,32 +46,24 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
             config.get("userId")
         )
 
-        thread_id = configurable.get("thread_id")
-
-        # If no user_id provided, create a new thread
+        # If no user_id provided, create a new thread (anonymous session)
         if not user_id:
             new_thread_id = str(uuid.uuid4())
             config["configurable"] = {
                 **configurable, "thread_id": new_thread_id}
             return config
 
-        # Always check for recent session restoration to support page refresh
-        recent_thread_id = await self.checkpointer.get_recent_active_conversation(
-            user_id, self.hours_threshold
-        )
+        # Get or create the user's single conversation
+        thread_id = await self.checkpointer.get_or_create_user_conversation(user_id)
 
-        if recent_thread_id:
-            # Restore recent session (override any provided thread_id)
-            config["configurable"] = {
-                **configurable, "thread_id": recent_thread_id, "user_id": user_id
-            }
-        else:
-            # Use provided thread_id or create new session
-            if not thread_id:
-                thread_id = str(uuid.uuid4())
-            config["configurable"] = {
-                **configurable, "thread_id": thread_id, "user_id": user_id
-            }
+        # Clean up any duplicate conversations for this user (maintenance)
+        await self.checkpointer.cleanup_old_conversations(user_id)
+
+        config["configurable"] = {
+            **configurable,
+            "thread_id": thread_id,
+            "user_id": user_id
+        }
 
         return config
 

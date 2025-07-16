@@ -397,29 +397,73 @@ class ConversationAwareMongoCheckpointer(BaseCheckpointSaver):
 
     async def get_recent_active_conversation(self, user_id: str, hours_threshold: int = 3) -> Optional[str]:
         """
-        Find most recent conversation within threshold - follows CosmosDB query pattern.
+        Get the single conversation for this user.
 
-        Equivalent to: SELECT TOP 1 * FROM c WHERE c.userId = @userId
-                      ORDER BY c.lastUpdated DESC
+        One conversation per user that persists indefinitely.
+        If conversation exists but is older than threshold, it will be reused (not deleted).
+
+        Returns the thread_id of the user's conversation, or None if no conversation exists.
         """
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours_threshold)
-
-        # Efficient query: user partition + time filter + sort
+        # Find any conversation for this user (ignore time threshold for now)
         doc = await self.collection.find_one(
-            {
-                "userId": user_id,
-                "lastUpdated": {"$gte": cutoff_time}
-            },
+            {"userId": user_id},
+            # Get the most recent one if multiple exist
             sort=[("lastUpdated", -1)]
         )
 
-        return doc["id"] if doc else None
+        if doc:
+            return doc["id"]
 
-    async def delete_conversation(self, thread_id: str, user_id: str) -> bool:
+        return None
+
+    async def get_or_create_user_conversation(self, user_id: str) -> str:
+        """
+        Get the user's single conversation thread_id, or create one if it doesn't exist.
+        This ensures each user has exactly one conversation that persists over time.
+        """
+        # Check if user already has a conversation
+        doc = await self.collection.find_one(
+            {"userId": user_id},
+            sort=[("lastUpdated", -1)]
+        )
+
+        if doc:
+            return doc["id"]
+
+        # Create a new thread_id for this user
+        # Use a deterministic format: user-{user_id} to make it predictable
+        thread_id = f"user-{user_id}"
+
+        # Note: The conversation document will be created when the first message is saved
+        return thread_id
+
+    async def cleanup_old_conversations(self, user_id: str):
+        """
+        Clean up any extra conversations for a user, keeping only the most recent one.
+        This is a maintenance operation to fix any existing duplicate conversations.
+        """
+        conversations = await self.collection.find(
+            {"userId": user_id},
+            sort=[("lastUpdated", -1)]
+        ).to_list(length=None)
+
+        if len(conversations) <= 1:
+            return  # Nothing to clean up
+
+        # Keep the most recent conversation, delete the rest
+        keep_conversation = conversations[0]
+        delete_conversations = conversations[1:]
+
+        for conv in delete_conversations:
+            await self.collection.delete_one({"_id": conv["_id"]})
+
+        print(
+            f"Cleaned up {len(delete_conversations)} old conversations for user {user_id}, kept {keep_conversation['id']}")
+
+    async def delete_conversation(self, thread_id: str) -> bool:
         """Delete a conversation - point delete operation."""
         result = await self.collection.delete_one({
-            "id": thread_id,
-            "userId": user_id
+            "id": thread_id
         })
         return result.deleted_count > 0
 

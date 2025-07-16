@@ -119,10 +119,18 @@ def health():
 
 @app.get("/conversations/{user_id}", response_model=List[ConversationResponse])
 async def get_user_conversations(user_id: str, limit: int = 50):
-    """Get all conversations for a specific user."""
+    """Get the single conversation for a specific user (new model: one conversation per user)."""
     global checkpointer
     try:
         conversations = await checkpointer.get_conversations_by_user(user_id, limit)
+
+        # With the new model, there should be at most one conversation per user
+        if len(conversations) > 1:
+            # Clean up duplicates automatically
+            await checkpointer.cleanup_old_conversations(user_id)
+            # Fetch again after cleanup
+            conversations = await checkpointer.get_conversations_by_user(user_id, limit)
+
         return [
             ConversationResponse(
                 thread_id=conv["thread_id"],
@@ -140,21 +148,33 @@ async def get_user_conversations(user_id: str, limit: int = 50):
 
 @app.post("/conversations", response_model=Dict[str, str])
 async def create_conversation(request: CreateConversationRequest):
-    """Create a new conversation thread for a user."""
-    thread_id = str(uuid.uuid4())
-    return {
-        "thread_id": thread_id,
-        "user_id": request.user_id,
-        "message": "New conversation created"
-    }
+    """Get or create conversation for a user (new model: one conversation per user)."""
+    global checkpointer
+    try:
+        # Get or create the user's single conversation
+        thread_id = await checkpointer.get_or_create_user_conversation(request.user_id)
+        return {
+            "thread_id": thread_id,
+            "user_id": request.user_id,
+            "message": "Conversation ready"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error creating conversation: {str(e)}")
 
 
 @app.delete("/conversations/{thread_id}")
-async def delete_conversation(thread_id: str, user_id: str):
-    """Delete a specific conversation."""
+async def delete_conversation_thread(thread_id: str):
+    """Delete a conversation thread """
     global checkpointer
     try:
-        deleted = await checkpointer.delete_conversation(thread_id, user_id)
+        # Find and delete the user's conversation (use "id" field, not "thread_id")
+        doc = await checkpointer.collection.find_one({"id": thread_id})
+        if not doc:
+            raise HTTPException(
+                status_code=404, detail="Conversation not found")
+
+        deleted = await checkpointer.delete_conversation(doc["id"])
         if not deleted:
             raise HTTPException(
                 status_code=404, detail="Conversation not found")
@@ -166,29 +186,59 @@ async def delete_conversation(thread_id: str, user_id: str):
 
 @app.get("/session/{user_id}")
 async def get_session_info(user_id: str):
-    """Get session information for a user (for debugging and frontend use)."""
+    """Get session information for a user (new model: always returns the user's single conversation)."""
     global checkpointer
     try:
-        # Check for recent active conversation
-        recent_thread_id = await checkpointer.get_recent_active_conversation(user_id, hours_threshold=3)
+        # Get the user's conversation (no time threshold needed)
+        thread_id = await checkpointer.get_or_create_user_conversation(user_id)
 
-        if recent_thread_id:
-            return {
-                "user_id": user_id,
-                "has_recent_session": True,
-                "thread_id": recent_thread_id,
-                "message": "Recent session found and will be restored"
-            }
-        else:
-            return {
-                "user_id": user_id,
-                "has_recent_session": False,
-                "thread_id": None,
-                "message": "No recent session found, new session will be created"
-            }
+        return {
+            "user_id": user_id,
+            "has_recent_session": True,  # Always true since we maintain one conversation per user
+            "thread_id": thread_id,
+            "message": "User conversation ready"
+        }
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error checking session: {str(e)}")
+
+
+@app.get("/thread/{thread_id}", response_model=ConversationResponse)
+async def get_conversation_by_thread(thread_id: str):
+    """Get conversation details by thread ID."""
+    global checkpointer
+    try:
+        # Find conversation by thread_id (which is stored as "id" in the document)
+        doc = await checkpointer.collection.find_one({"id": thread_id})
+        if not doc:
+            raise HTTPException(
+                status_code=404, detail="Conversation not found")
+
+        # Extract message count
+        message_count = len(doc.get("messages", []))
+
+        # Get first message preview
+        first_message_preview = None
+        messages = doc.get("messages", [])
+        if messages:
+            first_message_preview = {
+                "role": messages[0].get("role", ""),
+                "content": messages[0].get("content", "")[:100] + "..." if len(messages[0].get("content", "")) > 100 else messages[0].get("content", ""),
+                "timestamp": messages[0].get("timestamp", "")
+            }
+
+        return ConversationResponse(
+            thread_id=doc["id"],
+            user_id=doc["userId"],
+            last_updated=doc["lastUpdated"].isoformat(),
+            message_count=message_count,
+            first_message_preview=first_message_preview
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving conversation: {str(e)}")
 
 
 def main():

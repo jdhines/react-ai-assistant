@@ -13,7 +13,6 @@ from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langgraph.prebuilt.tool_node import ToolNode
 from copilotkit import CopilotKitState
-from .mongo_checkpointer import MongoCheckpointSaver
 
 
 class AgentState(CopilotKitState):
