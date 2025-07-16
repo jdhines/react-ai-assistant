@@ -3,7 +3,7 @@ This is the main entry point for the agent.
 It defines the workflow graph, state, tools, nodes and edges.
 """
 import os
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from typing_extensions import Literal
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import SystemMessage, AIMessage
@@ -13,7 +13,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langgraph.prebuilt.tool_node import ToolNode
 from copilotkit import CopilotKitState
-from langgraph.checkpoint.memory import InMemorySaver
+from .mongo_checkpointer import MongoCheckpointSaver
 
 
 class AgentState(CopilotKitState):
@@ -59,8 +59,48 @@ async def chat_node(state: AgentState, config: RunnableConfig) -> Command[Litera
     For more about the ReAct design pattern, see:
     https://www.perplexity.ai/search/react-agents-NcXLQhreS0WDzpVaS4m9Cg
     """
+    # Debug: Print state and config to understand what's available
+    print(f"💬 chat_node called with state keys: {list(state.keys())}")
+    print(f"💬 chat_node config: {config}")
+    print(f"💬 chat_node config.configurable: {config.get('configurable', {})}")
+
+    # Check if user_id is available in the state or config
+    user_id = None
+    if hasattr(state, 'user_id'):
+        user_id = state.user_id
+        print(f"💬 Found user_id in state: {user_id}")
+
+    config_user_id = config.get('configurable', {}).get('user_id')
+    if config_user_id:
+        print(f"💬 Found user_id in config.configurable: {config_user_id}")
+        user_id = config_user_id
+
+    if not user_id:
+        print(f"💬 No user_id found, checking other locations...")
+        # Check other possible locations
+        for key in ['userId', 'user', 'homeAccountId']:
+            if config.get('configurable', {}).get(key):
+                print(
+                    f"💬 Found {key} in config.configurable: {config['configurable'][key]}")
+            if hasattr(state, key) and getattr(state, key):
+                print(f"💬 Found {key} in state: {getattr(state, key)}")
+
+    # If no user_id is available, we can't save conversations properly
+    if not user_id:
+        print(f"💬 ⚠️  WARNING: No user_id found! Conversations won't be saved properly.")
+        # We could either:
+        # 1. Generate a random user_id for this session
+        # 2. Skip persistence
+        # 3. Raise an error
+        # For now, let's generate a session-specific ID
+        import uuid
+        user_id = f"anonymous-{str(uuid.uuid4())[:8]}"
+        print(f"💬 Generated anonymous user_id: {user_id}")
+        config.setdefault('configurable', {})['user_id'] = user_id
+
     # Load environment variables
-    load_dotenv()
+    env_vars = dotenv_values()
+    os.environ.update(env_vars)
 
     # 1. Define the model
     model = AzureChatOpenAI(
@@ -123,5 +163,5 @@ workflow.add_node("tool_node", ToolNode(tools=tools))
 workflow.add_edge("tool_node", "chat_node")
 workflow.set_entry_point("chat_node")
 
-# Compile the workflow graph
-graph = workflow.compile(checkpointer=InMemorySaver())
+# Note: The workflow is exported for server.py to compile with checkpointer
+# The graph compilation happens in server.py's lifespan function

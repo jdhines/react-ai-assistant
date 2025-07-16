@@ -32,5 +32,7 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports.biome": "explicit"
 	},
-	"editor.semanticHighlighting.enabled": "configuredByTheme"
+	"editor.semanticHighlighting.enabled": "configuredByTheme",
+	"python.pythonPath": "backend/lang-graph-service/.venv/Scripts/python.exe",
+	"python.defaultInterpreterPath": "backend/lang-graph-service/.venv/Scripts/python.exe"
 }

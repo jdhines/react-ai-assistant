@@ -12,6 +12,11 @@ const COPILOTKIT_URL = "http://localhost:4000/copilotkit";
 	Then use this line to import it:
 	const COPILOTKIT_URL = import.meta.env.VITE_COPILOTKIT_URL;
 */
+const userInfo = {
+	homeAccountId: "beware-the-krakken-1234",
+}
+//log the user info to the console
+console.log("User Info:", userInfo);
 
 export const Route = createRootRoute({
 	component: () => {
@@ -19,6 +24,9 @@ export const Route = createRootRoute({
 			<CopilotKit
 				runtimeUrl={COPILOTKIT_URL}
 				agent="sample_agent"
+				properties={{
+					user_id: userInfo.homeAccountId,
+				}}
 			>
 				<App />
 			</CopilotKit>

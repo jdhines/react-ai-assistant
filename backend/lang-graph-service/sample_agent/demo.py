@@ -3,15 +3,16 @@ This serves the "sample_agent" agent. This is an example of self-hosting an agen
 through our FastAPI integration. However, you can also host in LangGraph platform.
 """
 
-import os
-from dotenv import load_dotenv
-load_dotenv() # pylint: disable=wrong-import-position
-
-from fastapi import FastAPI
-import uvicorn
-from copilotkit.integrations.fastapi import add_fastapi_endpoint
-from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
 from sample_agent.agent import graph
+from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
+from copilotkit.integrations.fastapi import add_fastapi_endpoint
+import uvicorn
+from fastapi import FastAPI
+import os
+from dotenv import dotenv_values
+# Load environment variables without system-wide pollution
+os.environ.update(dotenv_values())  # pylint: disable=wrong-import-position
+
 
 app = FastAPI()
 sdk = CopilotKitRemoteEndpoint(
@@ -25,6 +26,7 @@ sdk = CopilotKitRemoteEndpoint(
 )
 
 add_fastapi_endpoint(app, sdk, "/copilotkit")
+
 
 def main():
     """Run the uvicorn server."""
