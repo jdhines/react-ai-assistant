@@ -7,6 +7,7 @@ import uuid
 import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from dotenv import dotenv_values
@@ -59,13 +60,11 @@ async def lifespan(app: FastAPI):
         Dynamic agent factory that has access to CopilotKit properties.
         This is called by CopilotKit for each request and receives context including properties.
         """
-        print(f"🔧 create_agents called with context: {context}")
 
         # Extract user_id from CopilotKit properties
         user_id = None
         if 'properties' in context and context['properties']:
             user_id = context['properties'].get('user_id')
-            print(f"🔧 Found user_id in context properties: {user_id}")
 
         # Create agent with user_id in config
         agent_config = {}
@@ -75,7 +74,6 @@ async def lifespan(app: FastAPI):
                     'user_id': user_id
                 }
             }
-            print(f"🔧 Setting langgraph_config: {agent_config}")
 
         return [
             SessionAwareLangGraphAgent(
@@ -101,6 +99,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Add CORS middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173",
+                   "http://localhost:4173"],  # Common frontend dev ports
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")

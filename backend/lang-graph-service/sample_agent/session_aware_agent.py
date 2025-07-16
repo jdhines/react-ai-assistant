@@ -59,10 +59,6 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
         thread_id = configurable.get("thread_id")
         print(f"🔍 DEBUG: Extracted thread_id: {thread_id}")
 
-        # If thread_id is already provided, use it as-is
-        if thread_id:
-            return config
-
         # If no user_id provided, create a new thread
         if not user_id:
             new_thread_id = str(uuid.uuid4())
@@ -72,24 +68,36 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
                 f"⚠️  No user_id found, creating anonymous session {new_thread_id[:8]}...")
             return config
 
-        # Look for recent active conversation for this user
+        # ALWAYS check for recent session restoration, even if thread_id exists
+        # This allows us to restore sessions on page refresh
         recent_thread_id = await self.checkpointer.get_recent_active_conversation(
             user_id, self.hours_threshold
         )
 
         if recent_thread_id:
-            # Restore recent session
+            # Force restore recent session, even if a different thread_id was provided
+            if thread_id and thread_id != recent_thread_id:
+                print(
+                    f"🔄 Overriding CopilotKit thread_id {thread_id[:8]}... with recent session {recent_thread_id[:8]}... for user {user_id}")
+            else:
+                print(
+                    f"🔄 Restoring recent session {recent_thread_id[:8]}... for user {user_id}")
+
             config["configurable"] = {
                 **configurable, "thread_id": recent_thread_id, "user_id": user_id}
-            print(
-                f"🔄 Restoring recent session {recent_thread_id[:8]}... for user {user_id}")
         else:
-            # Create new session
-            new_thread_id = str(uuid.uuid4())
-            config["configurable"] = {
-                **configurable, "thread_id": new_thread_id, "user_id": user_id}
-            print(
-                f"🆕 Creating new session {new_thread_id[:8]}... for user {user_id}")
+            # Use provided thread_id or create new session
+            if thread_id:
+                config["configurable"] = {
+                    **configurable, "thread_id": thread_id, "user_id": user_id}
+                print(
+                    f"🆕 Using provided thread_id {thread_id[:8]}... for user {user_id}")
+            else:
+                new_thread_id = str(uuid.uuid4())
+                config["configurable"] = {
+                    **configurable, "thread_id": new_thread_id, "user_id": user_id}
+                print(
+                    f"🆕 Creating new session {new_thread_id[:8]}... for user {user_id}")
 
         return config
 

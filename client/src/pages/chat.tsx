@@ -7,12 +7,27 @@ import React from "react";
 
 
 export function ChatPage() {
-	const { reset, visibleMessages } = useCopilotChat();
+	const { reset, visibleMessages, isLoading } = useCopilotChat();
 
 	//TODO: remove this logging when no longer needed
 	React.useEffect(() => {
 		console.log("Visible messages:", visibleMessages);
 	}, [visibleMessages]);
+
+	// Show loading state while session is being restored or chat is initializing
+	if (isLoading && visibleMessages.length === 0) {
+		return (
+			<div id="chat-page" className="h-[100vh] overflow-hidden flex flex-col flex-1 bg-white">
+				<ChatHeader onNewChat={reset} />
+				<div className="flex-1 flex items-center justify-center">
+					<div className="text-center">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+						<p className="text-gray-600">Loading chat session...</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	// TODO: the use of this to use a custom RenderTextMessage function is an example only
 	/*
