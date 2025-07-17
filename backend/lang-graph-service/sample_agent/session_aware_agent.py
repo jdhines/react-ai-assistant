@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from langchain_core.runnables import RunnableConfig
 from copilotkit import LangGraphAgent
-from .conversation_aware_checkpointer import ConversationAwareMongoCheckpointer
+from .cosmosdb_checkpointer import Checkpointer
 
 
 class SessionAwareLangGraphAgent(LangGraphAgent):
@@ -18,7 +18,7 @@ class SessionAwareLangGraphAgent(LangGraphAgent):
     Otherwise, it creates a new conversation thread.
     """
 
-    def __init__(self, checkpointer: ConversationAwareMongoCheckpointer, hours_threshold: int = 3, **kwargs):
+    def __init__(self, checkpointer: Checkpointer, hours_threshold: int = 3, **kwargs):
         """
         Initialize the session-aware agent.
 

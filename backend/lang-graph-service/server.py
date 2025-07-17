@@ -15,7 +15,7 @@ from copilotkit.integrations.fastapi import add_fastapi_endpoint
 from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent, CopilotKitState
 # the coagents-starter path, replace this if its different
 from sample_agent.agent import workflow, AgentState
-from sample_agent.conversation_aware_checkpointer import ConversationAwareMongoCheckpointer
+from sample_agent.cosmosdb_checkpointer import Checkpointer, CheckpointerConfig
 from sample_agent.session_aware_agent import SessionAwareLangGraphAgent
 
 
@@ -38,20 +38,55 @@ class CreateConversationRequest(BaseModel):
     title: Optional[str] = None
 
 
+class DatabaseSummaryResponse(BaseModel):
+    total_conversations: int
+    unique_users: List[str]
+    unique_thread_ids: List[str]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """FastAPI lifespan handler to set up MongoDB persistence and CopilotKit integration."""
+    """FastAPI lifespan handler to set up CosmosDB persistence and CopilotKit integration."""
     global checkpointer
 
-    # Initialize MongoDB connection
-    mongo_connection_string = os.getenv(
-        "MONGODB_CONNECTION_STRING", "mongodb://localhost:27017")
-    checkpointer = ConversationAwareMongoCheckpointer(mongo_connection_string)
+    # Initialize CosmosDB connection
+    cosmosdb_endpoint = os.getenv("COSMOSDB_ENDPOINT")
+    if not cosmosdb_endpoint:
+        raise ValueError("COSMOSDB_ENDPOINT environment variable is required")
+
+    # Optional: Use connection string instead of DefaultAzureCredential
+    cosmosdb_connection_string = os.getenv("COSMOSDB_CONNECTION_STRING")
+
+    config = CheckpointerConfig(
+        DATABASE=os.getenv("COSMOSDB_DATABASE", "chat_assistant"),
+        ENDPOINT=cosmosdb_endpoint,
+        CONVERSATIONS_CONTAINER=os.getenv(
+            "COSMOSDB_CONVERSATIONS_CONTAINER", "conversations"),
+        CHECKPOINTS_CONTAINER=os.getenv(
+            "COSMOSDB_CHECKPOINTS_CONTAINER", "checkpoints"),
+        CHECKPOINT_WRITES_CONTAINER=os.getenv(
+            "COSMOSDB_CHECKPOINT_WRITES_CONTAINER", "checkpoint_writes")
+    )
+
+    # Use connection string if provided, otherwise use DefaultAzureCredential
+    if cosmosdb_connection_string:
+        checkpointer = Checkpointer(
+            endpoint=cosmosdb_endpoint,
+            credential=cosmosdb_connection_string,
+            config=config
+        )
+    else:
+        from azure.identity import DefaultAzureCredential
+        checkpointer = Checkpointer(
+            endpoint=cosmosdb_endpoint,
+            credential=DefaultAzureCredential(),
+            config=config
+        )
 
     # Set up indexes
     await checkpointer.ensure_indexes()
 
-    # Create the graph with MongoDB checkpointer
+    # Create the graph with CosmosDB checkpointer
     graph = workflow.compile(checkpointer=checkpointer)
 
     # Use dynamic agents to access CopilotKit properties
@@ -79,7 +114,7 @@ async def lifespan(app: FastAPI):
             SessionAwareLangGraphAgent(
                 checkpointer=checkpointer,
                 name="sample_agent",
-                description="AI assistant with persistent conversation history using MongoDB and automatic session restoration",
+                description="AI assistant with persistent conversation history using CosmosDB and automatic session restoration",
                 graph=graph,
                 langgraph_config=agent_config,
             )
@@ -117,7 +152,7 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/conversations/{user_id}", response_model=List[ConversationResponse])
+@app.get("/conversation-by-user/{user_id}", response_model=List[ConversationResponse])
 async def get_user_conversations(user_id: str, limit: int = 50):
     """Get the single conversation for a specific user (new model: one conversation per user)."""
     global checkpointer
@@ -169,11 +204,17 @@ async def delete_conversation_thread(thread_id: str):
     global checkpointer
     try:
         # Find and delete the user's conversation (use "id" field, not "thread_id")
-        doc = await checkpointer.collection.find_one({"id": thread_id})
-        if not doc:
+        # Note: In CosmosDB, we need to query the conversations container
+        query = "SELECT * FROM c WHERE c.id = @thread_id"
+        parameters = [{"name": "@thread_id", "value": thread_id}]
+        items = [item async for item in checkpointer.conversations_container.query_items(
+            query=query, parameters=parameters)]
+
+        if not items:
             raise HTTPException(
                 status_code=404, detail="Conversation not found")
 
+        doc = items[0]
         deleted = await checkpointer.delete_conversation(doc["id"])
         if not deleted:
             raise HTTPException(
@@ -203,16 +244,22 @@ async def get_session_info(user_id: str):
             status_code=500, detail=f"Error checking session: {str(e)}")
 
 
-@app.get("/conversations/{thread_id}", response_model=ConversationResponse)
+@app.get("/conversation-by-id/{thread_id}", response_model=ConversationResponse)
 async def get_conversation_by_thread(thread_id: str):
     """Get conversation details by thread ID."""
     global checkpointer
     try:
         # Find conversation by thread_id (which is stored as "id" in the document)
-        doc = await checkpointer.collection.find_one({"id": thread_id})
-        if not doc:
+        query = "SELECT * FROM c WHERE c.id = @thread_id"
+        parameters = [{"name": "@thread_id", "value": thread_id}]
+        items = [item async for item in checkpointer.conversations_container.query_items(
+            query=query, parameters=parameters)]
+
+        if not items:
             raise HTTPException(
                 status_code=404, detail="Conversation not found")
+
+        doc = items[0]
 
         # Extract message count
         message_count = len(doc.get("messages", []))
@@ -230,7 +277,7 @@ async def get_conversation_by_thread(thread_id: str):
         return ConversationResponse(
             thread_id=doc["id"],
             user_id=doc["userId"],
-            last_updated=doc["lastUpdated"].isoformat(),
+            last_updated=doc["lastUpdated"],  # It's already in ISO format
             message_count=message_count,
             first_message_preview=first_message_preview
         )
@@ -239,6 +286,28 @@ async def get_conversation_by_thread(thread_id: str):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error retrieving conversation: {str(e)}")
+
+
+@app.get("/database-summary", response_model=DatabaseSummaryResponse)
+async def get_database_summary():
+    """Get a summary of the database: total conversations, unique users, and unique thread IDs."""
+    global checkpointer
+    try:
+        # Get the count of all conversations
+        total_conversations = await checkpointer.get_total_conversations()
+
+        # Get all unique user IDs and thread IDs
+        unique_users = await checkpointer.get_all_unique_user_ids()
+        unique_thread_ids = await checkpointer.get_all_unique_thread_ids()
+
+        return DatabaseSummaryResponse(
+            total_conversations=total_conversations,
+            unique_users=unique_users,
+            unique_thread_ids=unique_thread_ids
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving database summary: {str(e)}")
 
 
 def main():
