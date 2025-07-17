@@ -203,7 +203,7 @@ async def get_session_info(user_id: str):
             status_code=500, detail=f"Error checking session: {str(e)}")
 
 
-@app.get("/thread/{thread_id}", response_model=ConversationResponse)
+@app.get("/conversations/{thread_id}", response_model=ConversationResponse)
 async def get_conversation_by_thread(thread_id: str):
     """Get conversation details by thread ID."""
     global checkpointer
