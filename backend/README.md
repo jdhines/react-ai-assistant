@@ -148,7 +148,7 @@ The `conversations` container stores **one document per conversation thread** wi
 ```json
 {
   "_id": "ObjectId",
-  "thread_id": "uuid4-string",
+  "thread_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",  // Standard GUID format
   "user_id": "user123",
   "checkpoint_id": "latest-checkpoint-uuid",
   "checkpoint_ns": "timestamp",
@@ -175,7 +175,10 @@ The `conversations` container stores **one document per conversation thread** wi
 }
 ```
 
-**Key Design Decision**: Only the **latest checkpoint** is stored per conversation. Each new message/interaction replaces the entire document, keeping the database size manageable while preserving the complete conversation state.
+**Key Design Decisions**:
+- **GUID Format**: Thread IDs use standard GUID format (`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) for compatibility with external systems
+- **Latest Checkpoint Only**: Only the latest checkpoint is stored per conversation. Each new message/interaction replaces the entire document, keeping the database size manageable while preserving the complete conversation state
+- **User ID Storage**: User IDs are stored separately in the conversation document, not embedded in the thread ID
 
 ### Storage Efficiency - Latest Checkpoint Only
 

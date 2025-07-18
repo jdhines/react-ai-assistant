@@ -403,14 +403,12 @@ class Checkpointer(BaseCheckpointSaver):
         """Update the conversation document for conversation management."""
         thread_id = config["configurable"]["thread_id"]
 
-        # Extract user_id from thread_id (assuming format: user-{user_id})
-        user_id = None
-        if thread_id.startswith("user-"):
-            user_id = thread_id[5:]  # Remove "user-" prefix
+        # Extract user_id from the LangGraph config (passed when creating the conversation)
+        user_id = config["configurable"].get("user_id")
 
         if not user_id:
             logger.warning(
-                f"Could not extract user_id from thread_id: {thread_id}")
+                f"No user_id found in config for thread_id: {thread_id}")
             return  # Skip if we can't extract user_id
 
         logger.info(
@@ -486,8 +484,9 @@ class Checkpointer(BaseCheckpointSaver):
         if results:
             return results[0]["id"]
 
-        # Create a new thread_id for this user
-        thread_id = f"user-{user_id}"
+        # Create a new GUID-format thread_id for this user
+        import uuid
+        thread_id = str(uuid.uuid4())
         return thread_id
 
     async def cleanup_old_conversations(self, user_id: str):
