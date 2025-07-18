@@ -9,11 +9,6 @@ import React from "react";
 export function ChatPage() {
 	const { reset, visibleMessages, isLoading } = useCopilotChat();
 
-	//TODO: remove this logging when no longer needed
-	React.useEffect(() => {
-		console.log("Visible messages:", visibleMessages);
-	}, [visibleMessages]);
-
 	// Show loading state while session is being restored or chat is initializing
 	if (isLoading && visibleMessages.length === 0) {
 		return (
