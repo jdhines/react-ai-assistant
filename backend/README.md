@@ -241,8 +241,16 @@ For most chat applications, you only need the current state to continue conversa
 3. **Install poetry**
    Install the poetry package manager for python. [See how](https://python-poetry.org/docs/#installing-with-the-official-installer).
 
+  If that method doesn't work, do the following:
 
-4. **Install dependencies for runtime and backend**
+  ```sh
+    #make sure the Python venv is running (you should see `(.venv)` in your terminal above or next to the command line)
+    cd backend/lang-graph-service
+    python -m pip install poetry
+    python -m poetry install
+  ```
+
+1. **Install dependencies for runtime and backend**
 
    Open a new terminal tab (or shell) for each service.
 
@@ -256,7 +264,7 @@ For most chat applications, you only need the current state to continue conversa
    **Backend (FastAPI with LangGraph and CopilotKit):**
 
    ```sh
-      cd ../lang-graph-servicereact-client && poetry install
+      cd ../lang-graph-service && poetry install
       npm run dev
    ```
 
