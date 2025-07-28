@@ -268,28 +268,11 @@ For most chat applications, you only need the current state to continue conversa
       npm run dev
    ```
 
-   **MongoDB (must have Docker desktop running):**
+   **CosmosDB:**
 
-   ```bash
-   docker run -d --name mongodb -p 27017:27017 mongo:latest
-   ```
+  You can run a [CosmosDB emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-develop-emulator?tabs=windows%2Ccsharp&pivots=api-nosql) if you don't have one set up in Azure yet.
 
-   Or use Docker Compose:
-
-   ```yaml
-   # docker-compose.yml
-   version: '3.8'
-   services:
-   mongodb:
-      image: mongo:latest
-      ports:
-         - "27017:27017"
-      volumes:
-         - mongodb_data:/data/db
-
-   volumes:
-   mongodb_data:
-   ```
+  Via that link, you can either install using a Windows Installer, or get the emulator running in Docker.
 
 - Copilot runtime: http://localhost:4000/copilotkit
 - LangGraph agent: http://localhost:8000/copilotkit
