@@ -23,7 +23,10 @@ const SessionAwareCopilotKit = () => {
 	const [sessionCheckComplete, setSessionCheckComplete] = useState(false);
 
 	useEffect(() => {
-		// Check for recent session when component mounts
+		/* Check for recent chat session when component mounts
+				to pass thread_id to <CopilotKit>.
+				If no recent session, do nothing - CopilotKit will generate on the backend
+		*/
 		const checkForRecentSession = async () => {
 			try {
 				console.log("🔍 Checking for recent session for user:", userInfo.homeAccountId);
@@ -33,13 +36,10 @@ const SessionAwareCopilotKit = () => {
 				if (sessionInfo.has_recent_session && sessionInfo.thread_id) {
 					console.log("🔄 Found recent session, using thread_id:", sessionInfo.thread_id);
 					setThreadId(sessionInfo.thread_id);
-				} else {
-					console.log("🆕 No recent session found, CopilotKit will create new thread");
-					// Don't set threadId, let CopilotKit create a new one
 				}
 			} catch (error) {
-				console.error("❌ Error checking for recent session:", error);
 				// Continue without threadId, let CopilotKit create a new one
+				console.error("❌ Error checking for recent session:", error);
 			} finally {
 				setSessionCheckComplete(true);
 			}
