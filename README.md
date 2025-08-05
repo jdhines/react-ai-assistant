@@ -2,26 +2,9 @@
 
 A modern fullstack AI chat assistant application featuring persistent conversations, session restoration, and a beautiful React-based interface.
 
-## 🚀 Architecture Overview
-
-This application follows a microservices architecture with three main components:
-
-```text
-┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐
-│   React Client  │    │  CopilotKit Runtime  │    │  LangGraph Service   │
-│  (TanStack UI)  │◄──►│     (FastAPI)        │◄──►│    (FastAPI)         │
-│                 │    │                      │    │                      │
-│  Port: 3000     │    │    Port: 4000        │    │   Port: 8000         │
-└─────────────────┘    └──────────────────────┘    └─────────────────────┘
-                                                              │
-                                                              ▼
-                                                    ┌─────────────────────┐
-                                                    │      MongoDB        │
-                                                    │ (Conversation Store)│
-                                                    └─────────────────────┘
-```
-
 ## 🛠 Technology Stack
+
+![Tech stack diagram](./docs/HQ%20AI%20Assistant%20Tech%20Stack.png)
 
 ### Frontend
 
